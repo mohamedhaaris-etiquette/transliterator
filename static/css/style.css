@@ -1,0 +1,426 @@
+/* ============================================================
+   SIGNAL — Live Audio Translator
+   Design concept: a broadcast/mixing-console monitor. Two
+   "channel strips" (Signal In / Signal Out) flank a transport
+   bar with a live equalizer meter as the signature element.
+   ============================================================ */
+
+:root {
+  --bg: #12141c;
+  --bg-grid: #171a24;
+  --panel: #191c27;
+  --panel-raised: #1f2330;
+  --border: #2a2e3d;
+  --border-soft: #23273420;
+
+  --text: #eef0f5;
+  --muted: #8890a6;
+  --muted-dim: #5c637a;
+
+  --amber: #e8a33d;
+  --amber-dim: #4a3a20;
+  --teal: #4fd1c5;
+  --teal-dim: #1f3d3a;
+  --danger: #ef6461;
+
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background:
+    radial-gradient(circle at 15% -10%, #1c2130 0%, transparent 45%),
+    repeating-linear-gradient(0deg, var(--bg-grid) 0px, var(--bg-grid) 1px, transparent 1px, transparent 28px),
+    repeating-linear-gradient(90deg, var(--bg-grid) 0px, var(--bg-grid) 1px, transparent 1px, transparent 28px),
+    var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 40px 20px 60px;
+}
+
+/* ---------- Header ---------- */
+header {
+  margin-bottom: 28px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.brand-mark {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 0 3px var(--amber-dim);
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.16em;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin: 0;
+  font-size: 0.92rem;
+  max-width: 560px;
+  line-height: 1.5;
+}
+
+/* ---------- Console (transport bar) ---------- */
+.console {
+  background: linear-gradient(180deg, var(--panel-raised), var(--panel));
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+
+.console-row {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-dim);
+}
+
+select {
+  background: #0e1017;
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 9px 12px;
+  border-radius: 7px;
+  min-width: 200px;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+}
+
+select:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.transport {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  border: none;
+  padding: 10px 18px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.01em;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn-start {
+  background: var(--amber);
+  color: #241a08;
+}
+
+.btn-start:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.btn-start:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-stop {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+.btn-stop:hover:not(:disabled) {
+  background: rgba(239, 100, 97, 0.1);
+}
+
+.btn-stop:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Signature element: live equalizer meter */
+.meter {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 22px;
+  margin-left: auto;
+}
+
+.meter span {
+  width: 4px;
+  height: 20%;
+  border-radius: 2px;
+  background: var(--muted-dim);
+  transition: background 0.2s ease;
+}
+
+.meter.live span {
+  background: var(--teal);
+  animation: bounce 0.9s ease-in-out infinite;
+}
+
+.meter.live span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.meter.live span:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.meter.live span:nth-child(3) {
+  animation-delay: 0.24s;
+}
+
+.meter.live span:nth-child(4) {
+  animation-delay: 0.08s;
+}
+
+.meter.live span:nth-child(5) {
+  animation-delay: 0.18s;
+}
+
+@keyframes bounce {
+
+  0%,
+  100% {
+    height: 20%;
+  }
+
+  50% {
+    height: 90%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meter.live span {
+    animation: none;
+    height: 60%;
+  }
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--muted-dim);
+}
+
+.status-dot.status-on {
+  background: var(--teal);
+  box-shadow: 0 0 10px var(--teal);
+}
+
+/* ---------- Error box ---------- */
+.error-box {
+  margin-top: 14px;
+  background: #241414;
+  border: 1px solid var(--danger);
+  color: #ffb4b4;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.hidden {
+  display: none;
+}
+
+.debug-line {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--muted-dim);
+  min-height: 1.2em;
+}
+
+.debug-line .level-low {
+  color: var(--danger);
+}
+
+.debug-line .level-ok {
+  color: var(--teal);
+}
+
+/* ---------- Channel strips ---------- */
+.strips {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.strip {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  border-top: 2px solid var(--muted-dim);
+}
+
+.strip-in {
+  border-top-color: var(--amber);
+}
+
+.strip-out {
+  border-top-color: var(--teal);
+}
+
+.strip-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.strip-label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.strip-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--muted-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.feed {
+  padding: 14px;
+  height: 420px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.entry {
+  background: #10131c;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.entry .meta {
+  font-family: var(--font-mono);
+  color: var(--muted-dim);
+  font-size: 0.7rem;
+  margin-bottom: 5px;
+  letter-spacing: 0.02em;
+}
+
+.entry .speak-btn {
+  margin-top: 8px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--teal);
+  padding: 3px 10px;
+  border-radius: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.entry .speak-btn:hover {
+  border-color: var(--teal);
+  background: var(--teal-dim);
+}
+
+.feed::-webkit-scrollbar {
+  width: 8px;
+}
+
+.feed::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.feed::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+@media (max-width: 720px) {
+  .strips {
+    grid-template-columns: 1fr;
+  }
+
+  .console-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .meter {
+    margin-left: 0;
+  }
+}

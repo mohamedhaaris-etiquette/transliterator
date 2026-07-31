@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGNAL — Translation History</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root{--bg:#070708;--panel:#121216;--border:rgba(255,255,255,.09);--green:#22c55e;--text:#f3f4f6;--muted:#9ca3af}
+        *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 15% 0,#12301f 0,transparent 28%),var(--bg);color:var(--text);font-family:Inter,sans-serif;min-height:100vh}
+        .wrap{width:min(1120px,calc(100% - 32px));margin:0 auto;padding:26px 0 60px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px}.brand{display:flex;align-items:center;gap:10px;color:var(--text);text-decoration:none;font-family:'Space Grotesk';font-weight:700;letter-spacing:.15em}.dot{width:11px;height:11px;background:var(--green);border-radius:50%;box-shadow:0 0 14px var(--green)}.actions{display:flex;gap:10px}.btn{color:var(--text);border:1px solid var(--border);background:rgba(255,255,255,.04);padding:10px 14px;border-radius:9px;text-decoration:none;font-size:.86rem}.btn.primary{background:var(--green);color:#06120a;border-color:var(--green);font-weight:700}.heading h1{font-family:'Space Grotesk';font-size:clamp(2rem,4vw,3.4rem);margin:0 0 8px}.heading p{color:var(--muted);margin:0 0 26px}.session{background:rgba(18,18,22,.88);border:1px solid var(--border);border-radius:14px;margin-bottom:15px;overflow:hidden}.session-head{padding:16px 18px;display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border)}.session-title{font-weight:700}.meta{font-family:'JetBrains Mono';font-size:.72rem;color:var(--muted);margin-top:6px}.status{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;border:1px solid var(--border);padding:6px 9px;border-radius:999px}.transcripts{padding:8px 18px 18px}.row{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:13px 0;border-bottom:1px solid var(--border)}.row:last-child{border-bottom:0}.label{font-family:'JetBrains Mono';font-size:.68rem;color:var(--green);text-transform:uppercase;margin-bottom:6px}.text{line-height:1.55}.empty{color:var(--muted);padding:30px;background:var(--panel);border:1px solid var(--border);border-radius:14px;text-align:center}@media(max-width:700px){.top,.session-head{align-items:flex-start}.row{grid-template-columns:1fr}.actions{flex-wrap:wrap;justify-content:flex-end}}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <header class="top">
+        <a href="{% url 'translator:landing' %}" class="brand"><span class="dot"></span>SIGNAL</a>
+        <div class="actions">
+            <a class="btn primary" href="{% url 'translator:dashboard' %}">Live Dashboard</a>
+            <a class="btn" href="{% url 'accounts:logout' %}">Logout</a>
+        </div>
+    </header>
+    <section class="heading">
+        <h1>Translation history</h1>
+        <p>Your latest 50 translation sessions and saved transcript pairs.</p>
+    </section>
+
+    {% for session in sessions %}
+    <article class="session">
+        <div class="session-head">
+            <div>
+                <div class="session-title">{{ session.get_audio_source_display }} · {{ session.source_language|upper }} → {{ session.target_language|upper }}</div>
+                <div class="meta">Started {{ session.started_at|date:"d M Y, h:i A" }}{% if session.ended_at %} · Ended {{ session.ended_at|date:"h:i A" }}{% endif %}</div>
+            </div>
+            <span class="status">{{ session.get_status_display }}</span>
+        </div>
+        <div class="transcripts">
+            {% for transcript in session.transcripts.all %}
+            <div class="row">
+                <div><div class="label">Signal in · {{ transcript.detected_language }}</div><div class="text">{{ transcript.original_text }}</div></div>
+                <div><div class="label">Signal out · {{ transcript.target_language }}</div><div class="text">{{ transcript.translated_text }}</div></div>
+            </div>
+            {% empty %}
+            <div class="meta" style="padding-top:12px;">No recognized speech was saved in this session.</div>
+            {% endfor %}
+        </div>
+    </article>
+    {% empty %}
+    <div class="empty">No translation sessions yet. Open the live dashboard and start listening.</div>
+    {% endfor %}
+</div>
+</body>
+</html>
