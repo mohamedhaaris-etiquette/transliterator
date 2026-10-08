@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Payment - SIGNAL</title>
+
+    <style>
+        :root {
+            --background: #090b10;
+            --panel: #12141c;
+            --border: #2b2f3c;
+            --text: #f3f3f3;
+            --muted: #9499a8;
+            --yellow: #e8a33d;
+            --green: #4fd1c5;
+            --danger: #ff8a8a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            padding: 22px;
+            background: var(--background);
+            color: var(--text);
+            font-family: Arial, sans-serif;
+        }
+
+        .payment-card {
+            width: min(560px, 100%);
+            padding: 36px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--panel);
+        }
+
+        h1 {
+            margin: 0 0 10px;
+        }
+
+        .description {
+            margin: 0 0 28px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .error {
+            margin-bottom: 20px;
+            padding: 13px;
+            border: 1px solid rgba(255, 138, 138, 0.45);
+            border-radius: 9px;
+            background: rgba(255, 138, 138, 0.08);
+            color: var(--danger);
+            font-size: 13px;
+        }
+
+        .summary {
+            margin-bottom: 25px;
+            padding: 18px;
+            border: 1px solid rgba(79, 209, 197, 0.35);
+            border-radius: 10px;
+            background: rgba(79, 209, 197, 0.06);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin: 8px 0;
+        }
+
+        .summary-label {
+            color: var(--muted);
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 11px;
+            margin-bottom: 25px;
+        }
+
+        .method {
+            position: relative;
+        }
+
+        .method input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .method label {
+            min-height: 50px;
+            display: grid;
+            place-items: center;
+            padding: 13px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: #0d0f16;
+            color: var(--text);
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .method input:checked + label {
+            border-color: var(--green);
+            background: rgba(79, 209, 197, 0.12);
+            color: var(--green);
+        }
+
+        .warning {
+            margin-bottom: 22px;
+            padding: 13px;
+            border: 1px solid rgba(232, 163, 61, 0.45);
+            border-radius: 9px;
+            background: rgba(232, 163, 61, 0.08);
+            color: #ffd89a;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .button {
+            min-height: 47px;
+            display: grid;
+            place-items: center;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            background: var(--yellow);
+            color: #241a08;
+            cursor: pointer;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .button.secondary {
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text);
+        }
+
+        @media (max-width: 520px) {
+            .payment-methods,
+            .actions {
+                grid-template-columns: 1fr;
+            }
+
+            .payment-card {
+                padding: 26px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="payment-card">
+
+        <h1>Payment Page</h1>
+
+        <p class="description">
+            Review the selected subscription before continuing.
+        </p>
+
+        {% if error %}
+            <div class="error">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <section class="summary">
+
+            <div class="summary-row">
+                <span class="summary-label">Plan</span>
+                <strong>{{ plan.name }}</strong>
+            </div>
+
+            <div class="summary-row">
+                <span class="summary-label">Price</span>
+                <strong>₹{{ plan.price }}</strong>
+            </div>
+
+            <div class="summary-row">
+                <span class="summary-label">Validity</span>
+
+                {% if plan.validity_days %}
+                    <strong>{{ plan.validity_days }} days</strong>
+                {% else %}
+                    <strong>No expiry</strong>
+                {% endif %}
+            </div>
+
+        </section>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <input
+                type="hidden"
+                name="plan"
+                value="{{ plan.code }}"
+            >
+
+            <div class="payment-methods">
+
+                {% for value, label in payment_methods %}
+                    <div class="method">
+
+                        <input
+                            type="radio"
+                            id="payment_{{ value }}"
+                            name="payment_method"
+                            value="{{ value }}"
+                            required
+                        >
+
+                        <label for="payment_{{ value }}">
+                            {{ label }}
+                        </label>
+
+                    </div>
+                {% endfor %}
+
+            </div>
+
+            <div class="warning">
+                This is currently using local dummy payment mode.
+                Real Razorpay payment verification is not enabled yet.
+            </div>
+
+            <div class="actions">
+
+                <a
+                    class="button secondary"
+                    href="{% url 'subscriptions:plans' %}"
+                >
+                    Back to Plans
+                </a>
+
+                <button
+                    class="button"
+                    type="submit"
+                >
+                    Pay ₹{{ plan.price }}
+                </button>
+
+            </div>
+
+        </form>
+
+    </main>
+
+</body>
+
+</html>

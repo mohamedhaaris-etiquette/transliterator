@@ -1,0 +1,921 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Choose Your Plan - SIGNAL</title>
+
+  <style>
+    :root {
+      --bg: #050807;
+      --panel: rgba(14, 18, 17, 0.94);
+      --panel-soft: rgba(18, 23, 22, 0.88);
+      --border: rgba(255, 255, 255, 0.12);
+      --border-strong: rgba(255, 255, 255, 0.2);
+      --text: #f7f8f7;
+      --muted: #a7aca9;
+      --green: #27db79;
+      --green-strong: #13c965;
+      --green-soft: rgba(39, 219, 121, 0.14);
+      --green-glow: rgba(39, 219, 121, 0.34);
+      --danger: #fb7185;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+      background:
+        radial-gradient(
+          circle at 50% 15%,
+          rgba(39, 219, 121, 0.08),
+          transparent 32%
+        ),
+        linear-gradient(180deg, #070a09 0%, #030504 100%);
+      color: var(--text);
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    }
+
+    body::before {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      content: "";
+      pointer-events: none;
+      background-image:
+        linear-gradient(
+          rgba(39, 219, 121, 0.045) 1px,
+          transparent 1px
+        ),
+        linear-gradient(
+          90deg,
+          rgba(39, 219, 121, 0.045) 1px,
+          transparent 1px
+        );
+      background-size: 42px 42px;
+      mask-image:
+        linear-gradient(
+          to bottom,
+          transparent 0%,
+          black 28%,
+          black 85%,
+          transparent 100%
+        );
+    }
+
+    body::after {
+      position: fixed;
+      inset: auto 0 0;
+      z-index: -1;
+      height: 34vh;
+      content: "";
+      pointer-events: none;
+      background:
+        radial-gradient(
+          circle at 10% 70%,
+          rgba(39, 219, 121, 0.18) 0 2px,
+          transparent 3px
+        ),
+        radial-gradient(
+          circle at 28% 50%,
+          rgba(39, 219, 121, 0.16) 0 1px,
+          transparent 2px
+        ),
+        radial-gradient(
+          circle at 74% 60%,
+          rgba(39, 219, 121, 0.18) 0 2px,
+          transparent 3px
+        ),
+        radial-gradient(
+          circle at 92% 45%,
+          rgba(39, 219, 121, 0.16) 0 1px,
+          transparent 2px
+        );
+      background-size:
+        100px 70px,
+        140px 90px,
+        120px 80px,
+        160px 100px;
+      opacity: 0.75;
+    }
+
+    button,
+    a {
+      font: inherit;
+    }
+
+    form {
+      margin: 0;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+      background: rgba(4, 7, 6, 0.82);
+      backdrop-filter: blur(18px);
+    }
+
+    .header-inner {
+      width: min(1480px, calc(100% - 34px));
+      min-height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      margin: 0 auto;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text);
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: 1.6px;
+      text-decoration: none;
+    }
+
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow:
+        0 0 10px var(--green),
+        0 0 25px var(--green-glow);
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .welcome {
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .dashboard-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        transform 0.2s ease;
+    }
+
+    .dashboard-link:hover {
+      border-color: rgba(39, 219, 121, 0.55);
+      background: var(--green-soft);
+      transform: translateY(-1px);
+    }
+
+    .page-shell {
+      width: min(1480px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 22px 0 46px;
+    }
+
+    .hero {
+      padding: 8px 0 20px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(32px, 4vw, 48px);
+      line-height: 1.05;
+      letter-spacing: -1.5px;
+    }
+
+    .hero-copy {
+      max-width: 720px;
+      margin: 12px auto 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .billing-display {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 18px;
+      color: #d6dad7;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .billing-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      padding: 3px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: #202522;
+      cursor: default;
+    }
+
+    .billing-switch::after {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #d9ddda;
+      content: "";
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+    }
+
+    .billing-hint {
+      margin-top: 7px;
+      color: #6f7672;
+      font-size: 11px;
+    }
+
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .plan-card {
+      position: relative;
+      min-height: 560px;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 20px 20px;
+      overflow: visible;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background:
+        linear-gradient(
+          180deg,
+          rgba(18, 22, 21, 0.97),
+          rgba(10, 13, 12, 0.97)
+        );
+      box-shadow: var(--shadow);
+      transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .plan-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-3px);
+    }
+
+    .plan-card.recommended {
+      border: 2px solid rgba(39, 219, 121, 0.72);
+      background:
+        linear-gradient(
+          180deg,
+          rgba(14, 25, 20, 0.98),
+          rgba(8, 14, 11, 0.98)
+        );
+      box-shadow:
+        0 0 0 1px rgba(39, 219, 121, 0.08),
+        0 0 32px rgba(39, 219, 121, 0.22),
+        0 26px 75px rgba(0, 0, 0, 0.5);
+    }
+
+    .recommended-badge {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      z-index: 3;
+      min-width: 116px;
+      padding: 7px 16px;
+      border-radius: 999px;
+      background:
+        linear-gradient(
+          180deg,
+          #47eb8c,
+          #23cf70
+        );
+      color: #06210f;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      text-align: center;
+      text-transform: uppercase;
+      transform: translateX(-50%);
+      box-shadow:
+        0 0 14px rgba(39, 219, 121, 0.8),
+        0 0 32px rgba(39, 219, 121, 0.35);
+    }
+
+    .plan-name {
+      margin: 0 0 6px;
+      font-size: 24px;
+      font-weight: 850;
+      letter-spacing: -0.5px;
+    }
+
+    .recommended .plan-name {
+      color: #55e895;
+    }
+
+    .price-row {
+      min-height: 50px;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 11px;
+    }
+
+    .price {
+      font-size: 34px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+
+    .billing-note {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .plan-summary {
+      min-height: 54px;
+      margin: 0;
+      color: #c3c8c5;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .divider {
+      height: 1px;
+      margin: 13px 0;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .features-title {
+      margin: 0 0 12px;
+      color: #f4f6f5;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .features {
+      display: grid;
+      gap: 11px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .features li {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 8px;
+      align-items: start;
+      color: #d1d5d3;
+      font-size: 13px;
+      line-height: 1.42;
+    }
+
+    .feature-icon {
+      width: 17px;
+      height: 17px;
+      display: grid;
+      place-items: center;
+      margin-top: 1px;
+      border-radius: 50%;
+      background: rgba(39, 219, 121, 0.12);
+      color: var(--green);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .feature-icon.muted {
+      background: rgba(255, 255, 255, 0.06);
+      color: #777d79;
+    }
+
+    .plan-action {
+      width: 100%;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: auto;
+      padding: 10px 16px;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      background:
+        linear-gradient(
+          180deg,
+          #3ce083,
+          #22c96b
+        );
+      color: #06210f;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 850;
+      text-decoration: none;
+      box-shadow:
+        0 8px 20px rgba(39, 219, 121, 0.2);
+      transition:
+        filter 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .plan-action:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+      box-shadow:
+        0 10px 28px rgba(39, 219, 121, 0.3);
+    }
+
+    .plan-action.current {
+      border-color: rgba(255, 255, 255, 0.14);
+      background: transparent;
+      color: #8f9692;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .plan-action.current:hover {
+      filter: none;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .notice {
+      margin-top: 22px;
+      color: #7e8581;
+      font-size: 10px;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .bottom-glow {
+      width: 18px;
+      height: 18px;
+      margin: 17px auto 0;
+      background: var(--green);
+      clip-path:
+        polygon(
+          50% 0,
+          61% 39%,
+          100% 50%,
+          61% 61%,
+          50% 100%,
+          39% 61%,
+          0 50%,
+          39% 39%
+        );
+      opacity: 0.62;
+      filter: drop-shadow(0 0 11px var(--green));
+    }
+
+    @media (max-width: 1120px) {
+      .plans-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .plan-card {
+        min-height: 525px;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .header-inner,
+      .page-shell {
+        width: min(100% - 22px, 540px);
+      }
+
+      .header-inner {
+        min-height: 62px;
+      }
+
+      .welcome {
+        display: none;
+      }
+
+      .hero {
+        padding-top: 18px;
+      }
+
+      .hero h1 {
+        font-size: 31px;
+      }
+
+      .plans-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .plan-card {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="site-header">
+
+    <div class="header-inner">
+
+      <a
+        class="brand"
+        href="{% url 'translator:dashboard' %}"
+      >
+        <span class="brand-dot"></span>
+        <span>SIGNAL</span>
+      </a>
+
+      <div class="user-menu">
+
+        <span class="welcome">
+          Welcome, {{ request.user.username|default:"User" }}
+        </span>
+
+        <a
+          class="dashboard-link"
+          href="{% url 'translator:dashboard' %}"
+        >
+          Dashboard
+          <span aria-hidden="true">⌄</span>
+        </a>
+
+      </div>
+
+    </div>
+
+  </header>
+
+  <main class="page-shell">
+
+    <section class="hero">
+
+      <h1>Choose the right plan,</h1>
+
+      <p class="hero-copy">
+        Select the plan that matches your translation usage and features.
+      </p>
+
+      <div class="billing-display">
+        <span>Monthly/Yearly</span>
+        <span
+          class="billing-switch"
+          aria-label="Billing display only"
+          title="UI only. Backend billing remains unchanged."
+        ></span>
+      </div>
+
+      <p class="billing-hint">
+        Billing toggle is visual only. Current backend validity remains unchanged.
+      </p>
+
+    </section>
+
+    <section class="plans-grid">
+
+      <!-- Free -->
+      <article class="plan-card">
+
+        <h2 class="plan-name">Free</h2>
+
+        <div class="price-row">
+          <span class="price">₹0</span>
+          <span class="billing-note">/ forever</span>
+        </div>
+
+        <p class="plan-summary">
+          Try the core translation experience with limited daily usage.
+        </p>
+
+        <div class="divider"></div>
+
+        <p class="features-title">Includes:</p>
+
+        <ul class="features">
+
+          <li>
+            <span class="feature-icon">●</span>
+            <span>English and Tamil languages</span>
+          </li>
+
+          <li>
+            <span class="feature-icon">✓</span>
+            <span>1 hour usage every day</span>
+          </li>
+
+          <li>
+            <span class="feature-icon">✓</span>
+            <span>Daily reset at 12:00 AM IST</span>
+          </li>
+
+          <li>
+            <span class="feature-icon muted">–</span>
+            <span>No AI Voice</span>
+          </li>
+
+          <li>
+            <span class="feature-icon muted">–</span>
+            <span>No export features</span>
+          </li>
+
+        </ul>
+
+        {% if current_plan == "free" %}
+
+          <span class="plan-action current">
+            Your current plan
+          </span>
+
+        {% else %}
+
+          <form
+            method="post"
+            action="{% url 'subscriptions:choose_free' %}"
+          >
+            {% csrf_token %}
+
+            <button
+              type="submit"
+              class="plan-action"
+            >
+              Choose Free
+            </button>
+          </form>
+
+        {% endif %}
+
+      </article>
+
+      <!-- Basic -->
+      <article class="plan-card">
+
+        <h2 class="plan-name">Basic</h2>
+
+        <div class="price-row">
+          <span class="price">₹299</span>
+          <span class="billing-note">/ 30 days</span>
+        </div>
+
+        <p class="plan-summary">
+          More languages and longer usage for regular users.
+        </p>
+
+        <div class="divider"></div>
+
+        <p class="features-title">
+          Everything in Free, plus...
+        </p>
+
+        <ul class="features">
+
+          <li>
+            <span class="feature-icon">✓</span>
+            <span>10 supported languages</span>
+          </li>
+
+          <li>
+            <span class="feature-icon">◷</span>
+            <span>10 total usage hours</span>
+          </li>
+
+          <li>
+            <span class="feature-icon">⚡</span>
+            <span>Standard translation speed</span>
+          </li>
+
+          <li>
+            <span class="feature-icon">✓</span>
+            <span>Payment history</span>
+          </li>
+
+          <li>
+            <span class="feature-icon">✓</span>
+            <span>Plan renewal support</span>
+          </li>
+
+        </ul>
+
+        {% if current_plan == "basic" %}
+
+          <span class="plan-action current">
+            Your current plan
+          </span>
+
+        {% else %}
+
+          <button
+            type="button"
+            class="plan-action choose-plan"
+            data-plan="basic"
+          >
+            Subscribe to Basic
+          </button>
+
+        {% endif %}
+
+      </article>
+
+      <!-- Pro -->
+      <article class="plan-card recommended">
+
+        <span class="recommended-badge">
+          Recommended
+        </span>
+
+        <h2 class="plan-name">Pro</h2>
+
+        <div class="price-row">
+          <span class="price">₹999</span>
+          <span class="billing-note">/ 30 days</span>
+        </div>
+
+        <p class="plan-summary">
+          Maximum productivity for professional translation work.
+        </p>
+
+        <div class="divider"></div>
+
+        <p class="features-title">
+          Everything in Basic, plus...
+        </p>
+
+        <ul class="features">
+
+          <li>
+            <span class="feature-icon">▥</span>
+            <span>All supported languages</span>
+          </li>
+
+          <li>
+            <span class="feature-icon">◷</span>
+            <span>100-hour fair-use limit</span>
+          </li>
+
+          <li>
+            <span class="feature-icon">⚡</span>
+            <span>Faster translation</span>
+          </li>
+
+          <li>
+            <span class="feature-icon">◖</span>
+            <span>AI Voice</span>
+          </li>
+
+          <li>
+            <span class="feature-icon">⇩</span>
+            <span>Export transcription and translation</span>
+          </li>
+
+        </ul>
+
+        {% if current_plan == "pro" %}
+
+          <span class="plan-action current">
+            Your current plan
+          </span>
+
+        {% else %}
+
+          <button
+            type="button"
+            class="plan-action choose-plan"
+            data-plan="pro"
+          >
+            Upgrade to Pro
+          </button>
+
+        {% endif %}
+
+      </article>
+
+      <!-- Enterprise -->
+      <article class="plan-card">
+
+        <h2 class="plan-name">Enterprise</h2>
+
+        <div class="price-row">
+          <span class="price">₹4999</span>
+          <span class="billing-note">/ 30 days</span>
+        </div>
+
+        <p class="plan-summary">
+          Company-grade access, administration, and priority support.
+        </p>
+
+        <div class="divider"></div>
+
+        <p class="features-title">
+          Everything in Pro, plus...
+        </p>
+
+        <ul class="features">
+
+          <li>
+            <span class="feature-icon">⚡</span>
+            <span>500-hour fair-use limit</span>
+          </li>
+
+          <li>
+            <span class="feature-icon">♣</span>
+            <span>Team users and role management</span>
+          </li>
+
+          <li>
+            <span class="feature-icon">◆</span>
+            <span>API access</span>
+          </li>
+
+          <li>
+            <span class="feature-icon">♥</span>
+            <span>Priority support</span>
+          </li>
+
+          <li>
+            <span class="feature-icon">▥</span>
+            <span>Centralized billing and administration</span>
+          </li>
+
+        </ul>
+
+        {% if current_plan == "enterprise" %}
+
+          <span class="plan-action current">
+            Your current plan
+          </span>
+
+        {% else %}
+
+          <button
+            type="button"
+            class="plan-action choose-plan"
+            data-plan="enterprise"
+          >
+            Subscribe to Enterprise
+          </button>
+
+        {% endif %}
+
+      </article>
+
+    </section>
+
+    <p class="notice">
+      Prices and fair-use limits are temporary values.
+      Local testing uses dummy payment mode.
+      Real Razorpay verification is not enabled yet.
+    </p>
+
+    <div class="bottom-glow" aria-hidden="true"></div>
+
+  </main>
+
+  <script src="{% static 'js/subscription.js' %}"></script>
+
+</body>
+
+</html>

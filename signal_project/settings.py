@@ -4,7 +4,10 @@ import os
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".env")
+env_path = BASE_DIR / ".env"
+if not env_path.exists():
+    env_path = BASE_DIR / "signal_project" / ".env"
+load_dotenv(env_path)
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "change-me-before-production")
 DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() in {"1", "true", "yes", "on"}
@@ -23,6 +26,7 @@ INSTALLED_APPS = [
     "social_django",
     "accounts",
     "translator",
+    "subscriptions.apps.SubscriptionsConfig",
 ]
 
 MIDDLEWARE = [
@@ -31,6 +35,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "subscriptions.middleware.SubscriptionAccessMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "signal_project.middleware.NoCacheMiddleware",
@@ -59,22 +64,15 @@ TEMPLATES = [
 WSGI_APPLICATION = "signal_project.wsgi.application"
 ASGI_APPLICATION = "signal_project.asgi.application"
 
-if os.getenv("USE_SQLITE", "False").lower() in {"1", "true", "yes", "on"}:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
-else:
-    DATABASES = {
+
+DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.mysql",
-            "NAME": os.getenv("MYSQL_DATABASE", "signal_db"),
-            "USER": os.getenv("MYSQL_USER", "root"),
-            "PASSWORD": os.getenv("MYSQL_PASSWORD", ""),
-            "HOST": os.getenv("MYSQL_HOST", "127.0.0.1"),
-            "PORT": os.getenv("MYSQL_PORT", "3306"),
+            "NAME": 'etiquetteai_transliterator',
+            "USER": 'etiquetteai_transliterator',
+            "PASSWORD": '[d#-sF0r}*n?R@7q',
+            "HOST":'148.66.154.150',
+            "PORT":'3306',
             "OPTIONS": {
                 "charset": "utf8mb4",
                 "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
@@ -94,8 +92,8 @@ AUTHENTICATION_BACKENDS = [
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.getenv("GOOGLE_CLIENT_ID", "")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ["email", "profile"]
-SOCIAL_AUTH_LOGIN_REDIRECT_URL = "/main/"
-SOCIAL_AUTH_NEW_USER_REDIRECT_URL = "/main/"
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = "/plans/"
+SOCIAL_AUTH_NEW_USER_REDIRECT_URL = "/plans/"
 SOCIAL_AUTH_LOGIN_ERROR_URL = "/login/"
 SOCIAL_AUTH_RAISE_EXCEPTIONS = False
 
@@ -107,7 +105,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.auth_allowed',
     'social_core.pipeline.social_auth.social_user',
     'social_core.pipeline.social_auth.associate_by_email',
-    # 'social_core.pipeline.user.create_user',  <-- REMOVED so no new accounts are registered
+    'social_core.pipeline.user.create_user',
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
     'social_core.pipeline.user.user_details',
@@ -126,7 +124,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_URL = "accounts:login"
-LOGIN_REDIRECT_URL = "translator:dashboard"
+LOGIN_REDIRECT_URL = "subscriptions:plans"
 LOGOUT_REDIRECT_URL = "accounts:login"
 
 CHANNEL_LAYERS = {
@@ -147,3 +145,18 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = False
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
+
+SUBSCRIPTION_TEST_PAYMENT_MODE = True
+
+SUBSCRIPTION_PROTECTED_PREFIXES = [
+    "/main/",
+    "/languages/",
+    "/history/",
+]
+
+TRANSCRIPT_ENCRYPTION_KEY = os.getenv(
+    "TRANSCRIPT_ENCRYPTION_KEY",
+    "",
+).strip()
+
+

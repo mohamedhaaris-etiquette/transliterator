@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.db import models
 
+from .fields import EncryptedTextField
+
 
 class TranslationSession(models.Model):
     SOURCE_CHOICES = [
@@ -33,8 +35,8 @@ class TranslationSession(models.Model):
 class Transcript(models.Model):
     session = models.ForeignKey(TranslationSession, on_delete=models.CASCADE, related_name="transcripts")
     audio_source = models.CharField(max_length=20, default="system")
-    original_text = models.TextField()
-    translated_text = models.TextField()
+    original_text = EncryptedTextField()
+    translated_text =EncryptedTextField()
     detected_language = models.CharField(max_length=20, blank=True, default="auto")
     target_language = models.CharField(max_length=20, default="en")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -44,3 +46,9 @@ class Transcript(models.Model):
 
     def __str__(self):
         return self.original_text[:80]
+
+
+
+
+
+

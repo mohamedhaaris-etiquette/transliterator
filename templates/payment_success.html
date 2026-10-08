@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <title>Payment Success</title>
+</head>
+
+<body>
+
+    <h1>Payment Successful</h1>
+
+    <p>
+        Your {{ usage_state.plan.name }} plan is active.
+    </p>
+
+    <p>
+        Expiry:
+        {{ usage_state.subscription.expires_at|default:"No expiry" }}
+    </p>
+
+    <a href="{% url 'translator:dashboard' %}">
+        Continue to Application
+    </a>
+
+</body>
+
+</html>
