@@ -10,9 +10,9 @@ if not env_path.exists():
 load_dotenv(env_path)
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "change-me-before-production")
-DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() in {"1", "true", "yes", "on"}
-ALLOWED_HOSTS = [h.strip() for h in os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",") if h.strip()]
-CSRF_TRUSTED_ORIGINS = [u.strip() for u in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if u.strip()]
+DEBUG = False
+ALLOWED_HOSTS = ['translitrator.etiquetteai.in', 'www.translitrator.etiquetteai.in', '148.66.154.150', '127.0.0.1', 'localhost']
+CSRF_TRUSTED_ORIGINS = ['https://translitrator.etiquetteai.in', 'https://www.translitrator.etiquetteai.in']
 
 INSTALLED_APPS = [
     "daphne",
